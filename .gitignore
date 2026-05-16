@@ -44,3 +44,6 @@ next-env.d.ts
 # local planning docs (not for GitHub)
 mvp_plan.docx
 raicero_project.md
+
+# office lock files
+~$*

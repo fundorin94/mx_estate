@@ -69,24 +69,29 @@ export interface Lead {
   created_at: string;
 }
 
-type Insert<T extends { id: string; created_at: string }> = Omit<T, "id" | "created_at"> & {
-  id?: string;
-  created_at?: string;
+type TableShape<TRow> = {
+  Row: TRow;
+  Insert: Partial<TRow>;
+  Update: Partial<TRow>;
+  Relationships: [];
 };
 
 export interface Database {
   public: {
     Tables: {
-      cities: { Row: City; Insert: Insert<City>; Update: Partial<City> };
-      realtors: { Row: Realtor; Insert: Insert<Realtor>; Update: Partial<Realtor> };
-      properties: { Row: Property; Insert: Insert<Property>; Update: Partial<Property> };
-      leads: { Row: Lead; Insert: Insert<Lead>; Update: Partial<Lead> };
+      cities: TableShape<City>;
+      realtors: TableShape<Realtor>;
+      properties: TableShape<Property>;
+      leads: TableShape<Lead>;
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
     Enums: {
       property_type: PropertyType;
       expat_community_size: ExpatCommunitySize;
       internet_quality: InternetQuality;
       lead_timeline: LeadTimeline;
     };
+    CompositeTypes: Record<string, never>;
   };
 }

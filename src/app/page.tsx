@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -12,9 +13,16 @@ export default async function Home() {
   return (
     <main className="min-h-screen p-8 sm:p-16 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-2">MX Estate</h1>
-      <p className="text-gray-600 mb-8">
+      <p className="text-gray-600 mb-6">
         Property search for expats in Mexico — MVP scaffold.
       </p>
+
+      <Link
+        href="/properties"
+        className="inline-block mb-8 bg-black text-white rounded px-4 py-2 text-sm hover:bg-gray-800"
+      >
+        Browse properties →
+      </Link>
 
       <h2 className="text-xl font-semibold mb-4">Launch cities</h2>
 
