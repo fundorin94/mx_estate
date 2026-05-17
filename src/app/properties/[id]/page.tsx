@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { LeadForm } from "./lead-form";
 
 export const dynamic = "force-dynamic";
 
@@ -255,14 +256,10 @@ export default async function PropertyDetailPage({
                       WhatsApp
                     </a>
                   )}
-                  <button
-                    type="button"
-                    disabled
-                    className="bg-black text-white rounded px-4 py-2 text-sm hover:bg-gray-800 disabled:opacity-60 disabled:cursor-not-allowed"
-                    title="Lead form — coming next"
-                  >
-                    Request more info
-                  </button>
+                  <LeadForm
+                    propertyId={property.id}
+                    realtorId={realtor?.id ?? null}
+                  />
                 </div>
               </>
             ) : (
