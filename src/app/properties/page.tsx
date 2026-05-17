@@ -1,6 +1,20 @@
 import Link from "next/link";
+import dynamicImport from "next/dynamic";
 import { createClient } from "@/lib/supabase/server";
 import type { PropertyType } from "@/lib/supabase/types";
+import type { MapProperty } from "@/components/PropertyMap";
+
+const PropertyMap = dynamicImport(
+  () => import("@/components/PropertyMap").then((m) => m.PropertyMap),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full min-h-[400px] rounded border border-gray-200 bg-gray-50 flex items-center justify-center text-sm text-gray-500">
+        Loading map…
+      </div>
+    ),
+  },
+);
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +51,6 @@ export default async function PropertiesPage({
     minBedrooms: parseIntOrNull(searchParams.bedrooms),
   };
 
-  // Need all cities for the filter dropdown
   const { data: cities } = await supabase
     .from("cities")
     .select("id, name, slug")
@@ -51,7 +64,7 @@ export default async function PropertiesPage({
   let query = supabase
     .from("properties")
     .select(
-      "id, title, price_usd, type, neighborhood, bedrooms, bathrooms, area_sqm, images, fideicomiso_required, city_id"
+      "id, title, price_usd, type, neighborhood, bedrooms, bathrooms, area_sqm, images, fideicomiso_required, city_id, lat, lng",
     )
     .order("created_at", { ascending: false });
 
@@ -65,11 +78,29 @@ export default async function PropertiesPage({
   const { data: properties, error } = await query;
 
   const cityById = new Map<string, string>(
-    (cities ?? []).map((c) => [c.id, c.name])
+    (cities ?? []).map((c) => [c.id, c.name]),
   );
 
+  const mapProperties: MapProperty[] = (properties ?? [])
+    .map((p) => {
+      const lat = Number(p.lat);
+      const lng = Number(p.lng);
+      return {
+        id: p.id,
+        title: p.title,
+        price_usd: p.price_usd,
+        type: p.type,
+        lat,
+        lng,
+        cover: p.images?.[0] ?? null,
+        neighborhood: p.neighborhood,
+        city: cityById.get(p.city_id) ?? null,
+      };
+    })
+    .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+
   return (
-    <main className="min-h-screen p-6 sm:p-10 max-w-6xl mx-auto">
+    <main className="min-h-screen px-6 sm:px-10 py-6 max-w-7xl mx-auto">
       <nav className="text-sm text-gray-500 mb-4">
         <Link href="/" className="hover:underline">
           ← Home
@@ -83,7 +114,7 @@ export default async function PropertiesPage({
 
       <form
         method="GET"
-        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6 mb-8 p-4 border border-gray-200 rounded"
+        className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6 mb-6 p-4 border border-gray-200 rounded"
       >
         <label className="flex flex-col text-sm">
           <span className="text-gray-600 mb-1">City</span>
@@ -174,72 +205,85 @@ export default async function PropertiesPage({
 
       <p className="text-sm text-gray-500 mb-4">
         {properties?.length ?? 0} result{properties?.length === 1 ? "" : "s"}
+        {mapProperties.length < (properties?.length ?? 0) && (
+          <> · {mapProperties.length} on map</>
+        )}
       </p>
 
-      {properties && properties.length === 0 && !error && (
-        <p className="text-gray-500">
-          No properties match these filters. Try widening the search.
-        </p>
-      )}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* List */}
+        <section>
+          {properties && properties.length === 0 && !error && (
+            <p className="text-gray-500">
+              No properties match these filters. Try widening the search.
+            </p>
+          )}
 
-      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {properties?.map((p) => {
-          const cover = p.images?.[0];
-          const cityName = cityById.get(p.city_id);
-          return (
-            <li key={p.id}>
-            <Link
-              href={`/properties/${p.id}`}
-              className="border border-gray-200 rounded overflow-hidden flex flex-col h-full hover:border-gray-400 transition-colors"
-            >
-              {cover ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={cover}
-                  alt={p.title}
-                  className="w-full h-48 object-cover bg-gray-100"
-                />
-              ) : (
-                <div className="w-full h-48 bg-gray-100" />
-              )}
-              <div className="p-4 flex flex-col gap-2 flex-1">
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-lg font-semibold">
-                    ${p.price_usd.toLocaleString()}
-                    {p.type === "rent" && (
-                      <span className="text-sm font-normal text-gray-500">
-                        {" "}
-                        /mo
-                      </span>
+          <ul className="grid gap-6 sm:grid-cols-2">
+            {properties?.map((p) => {
+              const cover = p.images?.[0];
+              const cityName = cityById.get(p.city_id);
+              return (
+                <li key={p.id}>
+                  <Link
+                    href={`/properties/${p.id}`}
+                    className="border border-gray-200 rounded overflow-hidden flex flex-col h-full hover:border-gray-400 transition-colors"
+                  >
+                    {cover ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={cover}
+                        alt={p.title}
+                        className="w-full h-44 object-cover bg-gray-100"
+                      />
+                    ) : (
+                      <div className="w-full h-44 bg-gray-100" />
                     )}
-                  </span>
-                  <span className="text-xs uppercase tracking-wide text-gray-500">
-                    {p.type === "sale" ? "For sale" : "For rent"}
-                  </span>
-                </div>
-                <h3 className="font-medium">{p.title}</h3>
-                <div className="text-sm text-gray-500">
-                  {p.neighborhood}
-                  {cityName && <> · {cityName}</>}
-                </div>
-                <div className="text-sm text-gray-600 flex gap-3 mt-1">
-                  {p.bedrooms !== null && <span>🛏 {p.bedrooms}</span>}
-                  {p.bathrooms !== null && <span>🛁 {p.bathrooms}</span>}
-                  {p.area_sqm !== null && <span>📐 {p.area_sqm} m²</span>}
-                </div>
-                {p.fideicomiso_required && (
-                  <div className="mt-auto pt-2">
-                    <span className="inline-block text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800">
-                      Fideicomiso required
-                    </span>
-                  </div>
-                )}
-              </div>
-            </Link>
-            </li>
-          );
-        })}
-      </ul>
+                    <div className="p-4 flex flex-col gap-1 flex-1">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-base font-semibold">
+                          ${p.price_usd.toLocaleString()}
+                          {p.type === "rent" && (
+                            <span className="text-xs font-normal text-gray-500">
+                              {" "}
+                              /mo
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-xs uppercase tracking-wide text-gray-500">
+                          {p.type === "sale" ? "Sale" : "Rent"}
+                        </span>
+                      </div>
+                      <div className="text-sm font-medium">{p.title}</div>
+                      <div className="text-xs text-gray-500">
+                        {p.neighborhood}
+                        {cityName && <> · {cityName}</>}
+                      </div>
+                      <div className="text-xs text-gray-600 flex gap-3 mt-1">
+                        {p.bedrooms !== null && <span>🛏 {p.bedrooms}</span>}
+                        {p.bathrooms !== null && <span>🛁 {p.bathrooms}</span>}
+                        {p.area_sqm !== null && <span>📐 {p.area_sqm} m²</span>}
+                      </div>
+                      {p.fideicomiso_required && (
+                        <div className="mt-auto pt-2">
+                          <span className="inline-block text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800">
+                            Fideicomiso
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
+        {/* Map */}
+        <aside className="lg:sticky lg:top-6 h-[70vh] lg:h-[calc(100vh-3rem)]">
+          <PropertyMap properties={mapProperties} />
+        </aside>
+      </div>
     </main>
   );
 }
