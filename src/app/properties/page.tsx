@@ -100,13 +100,7 @@ export default async function PropertiesPage({
     .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
 
   return (
-    <main className="min-h-screen px-6 sm:px-10 py-6 max-w-7xl mx-auto">
-      <nav className="text-sm text-gray-500 mb-4">
-        <Link href="/" className="hover:underline">
-          ← Home
-        </Link>
-      </nav>
-
+    <main className="px-6 sm:px-10 py-6 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold mb-2">Properties</h1>
       <p className="text-gray-600 mb-6">
         Verified listings across our launch cities in Mexico.

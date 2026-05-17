@@ -11,15 +11,18 @@ export default async function Home() {
     .order("name");
 
   return (
-    <main className="min-h-screen p-8 sm:p-16 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-2">MX Estate</h1>
-      <p className="text-gray-600 mb-6">
-        Property search for expats in Mexico — MVP scaffold.
+    <main className="p-8 sm:p-16 max-w-4xl mx-auto">
+      <h1 className="text-4xl sm:text-5xl font-bold mb-3 leading-tight">
+        Find your home in Mexico
+      </h1>
+      <p className="text-lg text-gray-600 mb-6 max-w-2xl">
+        Verified listings, trusted realtors, and clear legal info — for US and
+        Canadian expats buying or renting in Mexico.
       </p>
 
       <Link
         href="/properties"
-        className="inline-block mb-8 bg-black text-white rounded px-4 py-2 text-sm hover:bg-gray-800"
+        className="inline-block mb-12 bg-emerald-700 text-white rounded px-5 py-2.5 text-sm font-medium hover:bg-emerald-800"
       >
         Browse properties →
       </Link>

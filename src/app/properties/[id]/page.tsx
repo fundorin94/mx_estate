@@ -69,14 +69,10 @@ export default async function PropertyDetailPage({
   const restImages = images.slice(1, 5);
 
   return (
-    <main className="min-h-screen p-6 sm:p-10 max-w-5xl mx-auto">
+    <main className="p-6 sm:p-10 max-w-5xl mx-auto">
       <nav className="text-sm text-gray-500 mb-4 flex gap-3">
-        <Link href="/" className="hover:underline">
-          Home
-        </Link>
-        <span>/</span>
         <Link href="/properties" className="hover:underline">
-          Properties
+          ← All properties
         </Link>
       </nav>
 
