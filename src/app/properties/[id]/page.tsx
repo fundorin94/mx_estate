@@ -223,7 +223,10 @@ export default async function PropertyDetailPage({
                     </div>
                   )}
                   <div>
-                    <div className="font-medium flex items-center gap-1">
+                    <Link
+                      href={`/realtors/${realtor.id}`}
+                      className="font-medium flex items-center gap-1 hover:underline"
+                    >
                       {realtor.name}
                       {realtor.is_verified && (
                         <span
@@ -233,7 +236,7 @@ export default async function PropertyDetailPage({
                           ✓
                         </span>
                       )}
-                    </div>
+                    </Link>
                     <div className="text-xs text-gray-500">
                       {realtor.expat_deals_count}+ expat deals ·{" "}
                       {realtor.languages?.join(", ")}
