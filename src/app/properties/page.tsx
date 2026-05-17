@@ -187,9 +187,10 @@ export default async function PropertiesPage({
           const cover = p.images?.[0];
           const cityName = cityById.get(p.city_id);
           return (
-            <li
-              key={p.id}
-              className="border border-gray-200 rounded overflow-hidden flex flex-col"
+            <li key={p.id}>
+            <Link
+              href={`/properties/${p.id}`}
+              className="border border-gray-200 rounded overflow-hidden flex flex-col h-full hover:border-gray-400 transition-colors"
             >
               {cover ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -234,6 +235,7 @@ export default async function PropertiesPage({
                   </div>
                 )}
               </div>
+            </Link>
             </li>
           );
         })}
