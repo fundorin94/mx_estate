@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
@@ -7,6 +8,61 @@ import { CompareToggle } from "@/components/CompareToggle";
 import { COMPARE_COOKIE, parseCompare } from "@/lib/compare";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  if (!isUuid(params.id)) return { title: "Property not found" };
+
+  const supabase = createClient();
+  const { data: property } = await supabase
+    .from("properties")
+    .select("id, title, description_en, price_usd, type, neighborhood, images, city_id")
+    .eq("id", params.id)
+    .maybeSingle();
+
+  if (!property) return { title: "Property not found" };
+
+  const { data: city } = await supabase
+    .from("cities")
+    .select("name")
+    .eq("id", property.city_id)
+    .maybeSingle();
+
+  const priceLabel =
+    property.type === "rent"
+      ? `$${property.price_usd.toLocaleString()}/mo`
+      : `$${property.price_usd.toLocaleString()}`;
+
+  const location = [property.neighborhood, city?.name].filter(Boolean).join(", ");
+
+  const title = `${priceLabel} · ${property.title}`;
+  const description =
+    property.description_en?.slice(0, 200) ??
+    `${property.title} in ${location || "Mexico"}. Listed on ExpHaven.`;
+  const image = property.images?.[0];
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/properties/${property.id}` },
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      url: `/properties/${property.id}`,
+      ...(image && { images: [{ url: image }] }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(image && { images: [image] }),
+    },
+  };
+}
 
 function isUuid(s: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);

@@ -21,6 +21,13 @@ const PropertyMap = dynamicImport(
 
 export const dynamic = "force-dynamic";
 
+export const metadata = {
+  title: "Properties for sale and rent in Mexico",
+  description:
+    "Browse verified property listings in Mexico for US and Canadian expats. Filter by city, type, price, and bedrooms across Cabo, Puerto Vallarta, and San Miguel de Allende.",
+  alternates: { canonical: "/properties" },
+};
+
 type SearchParams = {
   city?: string;
   type?: string;

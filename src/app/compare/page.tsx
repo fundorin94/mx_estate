@@ -8,6 +8,10 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Compare properties",
+  description:
+    "Compare up to 3 properties side-by-side with highlights for best price, largest, and other advantages.",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "/compare" },
 };
 
 export default async function ComparePage() {

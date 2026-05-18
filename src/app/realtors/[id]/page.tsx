@@ -1,8 +1,51 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  if (!UUID_RE.test(params.id)) return { title: "Agent not found" };
+
+  const supabase = createClient();
+  const { data: realtor } = await supabase
+    .from("realtors")
+    .select("id, name, bio_en, photo_url, cities, expat_deals_count")
+    .eq("id", params.id)
+    .maybeSingle();
+
+  if (!realtor) return { title: "Agent not found" };
+
+  const cities = realtor.cities?.join(", ");
+  const title = `${realtor.name} — Real estate agent${cities ? ` in ${cities}` : ""}`;
+  const description =
+    realtor.bio_en?.slice(0, 200) ??
+    `${realtor.name} is a verified real estate agent on ExpHaven with ${realtor.expat_deals_count}+ deals with foreign buyers${cities ? ` in ${cities}` : ""}.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/realtors/${realtor.id}` },
+    openGraph: {
+      type: "profile",
+      title,
+      description,
+      url: `/realtors/${realtor.id}`,
+      ...(realtor.photo_url && { images: [{ url: realtor.photo_url }] }),
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+      ...(realtor.photo_url && { images: [realtor.photo_url] }),
+    },
+  };
+}
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

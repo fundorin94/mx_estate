@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { CompareBar } from "@/components/CompareBar";
+import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from "@/lib/site";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -17,12 +18,43 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "MX Estate — Property search for US expats in Mexico",
-    template: "%s · MX Estate",
+    default: `${SITE_NAME} — Property search for US expats in Mexico`,
+    template: `%s · ${SITE_NAME}`,
   },
-  description:
-    "Verified property listings and trusted realtors for US and Canadian expats buying or renting in Mexico — Cabo, Puerto Vallarta, San Miguel de Allende.",
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME }],
+  keywords: [
+    "Mexico real estate",
+    "expat properties Mexico",
+    "buy property Mexico",
+    "rent Mexico",
+    "Cabo San Lucas",
+    "Puerto Vallarta",
+    "San Miguel de Allende",
+    "fideicomiso",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "en_US",
+    url: SITE_URL,
+    title: `${SITE_NAME} — Property search for US expats in Mexico`,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — Property search for US expats in Mexico`,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
 export default function RootLayout({

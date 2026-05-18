@@ -8,7 +8,7 @@ export function Header() {
           href="/"
           className="text-lg font-bold tracking-tight hover:opacity-80"
         >
-          MX <span className="text-emerald-700">Estate</span>
+          Exp<span className="text-emerald-700">Haven</span>
         </Link>
 
         <nav className="flex items-center gap-1 sm:gap-4 text-sm">
@@ -30,8 +30,14 @@ export function Header() {
           >
             Rent
           </Link>
+          <Link
+            href="/realtors"
+            className="hidden sm:inline-block px-2 py-1 rounded text-gray-700 hover:text-black hover:bg-gray-100"
+          >
+            Agents
+          </Link>
           <a
-            href="mailto:partners@mx-estate.com?subject=Realtor%20partnership"
+            href="mailto:partners@exphaven.com?subject=Realtor%20partnership"
             className="ml-1 sm:ml-2 px-3 py-1.5 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 text-xs sm:text-sm"
           >
             For realtors
