@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { LeadForm } from "./lead-form";
+import { CompareToggle } from "@/components/CompareToggle";
+import { COMPARE_COOKIE, parseCompare } from "@/lib/compare";
 
 export const dynamic = "force-dynamic";
 
@@ -68,12 +71,15 @@ export default async function PropertyDetailPage({
   const cover = images[0];
   const restImages = images.slice(1, 5);
 
+  const isInCompare = parseCompare(cookies().get(COMPARE_COOKIE)?.value).includes(property.id);
+
   return (
     <main className="p-6 sm:p-10 max-w-5xl mx-auto">
-      <nav className="text-sm text-gray-500 mb-4 flex gap-3">
+      <nav className="text-sm text-gray-500 mb-4 flex items-center justify-between gap-3">
         <Link href="/properties" className="hover:underline">
           ← All properties
         </Link>
+        <CompareToggle propertyId={property.id} isSelected={isInCompare} />
       </nav>
 
       {/* Gallery */}

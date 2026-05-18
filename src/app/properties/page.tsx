@@ -1,8 +1,11 @@
 import Link from "next/link";
 import dynamicImport from "next/dynamic";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import type { PropertyType } from "@/lib/supabase/types";
 import type { MapProperty } from "@/components/PropertyMap";
+import { CompareToggle } from "@/components/CompareToggle";
+import { COMPARE_COOKIE, parseCompare } from "@/lib/compare";
 
 const PropertyMap = dynamicImport(
   () => import("@/components/PropertyMap").then((m) => m.PropertyMap),
@@ -79,6 +82,10 @@ export default async function PropertiesPage({
 
   const cityById = new Map<string, string>(
     (cities ?? []).map((c) => [c.id, c.name]),
+  );
+
+  const compareIds = new Set(
+    parseCompare(cookies().get(COMPARE_COOKIE)?.value),
   );
 
   const mapProperties: MapProperty[] = (properties ?? [])
@@ -218,7 +225,13 @@ export default async function PropertiesPage({
               const cover = p.images?.[0];
               const cityName = cityById.get(p.city_id);
               return (
-                <li key={p.id}>
+                <li key={p.id} className="relative">
+                  <CompareToggle
+                    propertyId={p.id}
+                    isSelected={compareIds.has(p.id)}
+                    className="absolute top-2 right-2 z-10"
+                    size="sm"
+                  />
                   <Link
                     href={`/properties/${p.id}`}
                     className="border border-gray-200 rounded overflow-hidden flex flex-col h-full hover:border-gray-400 transition-colors"
