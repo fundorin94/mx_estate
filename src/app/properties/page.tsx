@@ -159,7 +159,7 @@ export default async function PropertiesPage({
             type="number"
             name="min_price"
             min={0}
-            step={1000}
+            step={1}
             defaultValue={filters.minPrice ?? ""}
             className="border border-gray-300 rounded px-2 py-1"
           />
@@ -171,7 +171,7 @@ export default async function PropertiesPage({
             type="number"
             name="max_price"
             min={0}
-            step={1000}
+            step={1}
             defaultValue={filters.maxPrice ?? ""}
             className="border border-gray-300 rounded px-2 py-1"
           />

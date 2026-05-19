@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { sendLeadNotification } from "@/lib/email";
 
 export type LeadFormState =
   | { status: "idle" }
@@ -87,6 +88,65 @@ export async function submitLead(
       status: "error",
       message: `Could not send your request: ${error.message}`,
     };
+  }
+
+  // Fire-and-log email notification. Lead is already saved; never fail user
+  // flow on email errors.
+  try {
+    const { data: property } = await supabase
+      .from("properties")
+      .select("id, title, price_usd, type, neighborhood, city_id")
+      .eq("id", propertyId)
+      .maybeSingle();
+
+    const [{ data: city }, { data: realtor }] = await Promise.all([
+      property?.city_id
+        ? supabase
+            .from("cities")
+            .select("name")
+            .eq("id", property.city_id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+      realtorId
+        ? supabase
+            .from("realtors")
+            .select("id, name, email, phone")
+            .eq("id", realtorId)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
+
+    if (property) {
+      await sendLeadNotification({
+        buyer: {
+          name,
+          email,
+          phone,
+          message,
+          budgetUsd: budget,
+          timeline,
+        },
+        property: {
+          id: property.id,
+          title: property.title,
+          priceUsd: property.price_usd,
+          type: property.type,
+          neighborhood: property.neighborhood,
+          cityName: city?.name ?? null,
+        },
+        realtor: realtor
+          ? {
+              id: realtor.id,
+              name: realtor.name,
+              email: realtor.email,
+              phone: realtor.phone,
+            }
+          : null,
+      });
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.error("[submitLead] notification failed:", e);
   }
 
   return { status: "success" };

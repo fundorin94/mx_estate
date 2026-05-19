@@ -75,7 +75,7 @@ export function LeadForm({
         name="budget_usd"
         type="number"
         min={0}
-        step={1000}
+        step={1}
         error={errs.budget_usd}
       />
 
